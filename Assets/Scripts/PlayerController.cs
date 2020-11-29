@@ -29,8 +29,15 @@ public class PlayerController : MonoBehaviour
         gameSceneController = FindObjectOfType<GameSceneController>();
         gameSceneController.ScoreUpdatedOnKill += GameSceneController_ScoreUpdatedOnKill;
 
+        EventBroker.ProjectileOutOfBounds += EnableProjectile;
+
         shieldTimeOut = new WaitForSeconds(shieldDuration);
         EnableShield();
+    }
+
+    private void OnDisable()
+    {
+        EventBroker.ProjectileOutOfBounds -= EnableProjectile;
     }
 
     private void GameSceneController_ScoreUpdatedOnKill(int pointValue)
@@ -95,13 +102,13 @@ public class PlayerController : MonoBehaviour
         ProjectileController projectile =
             Instantiate(projectilePrefab, spawnPosition, Quaternion.AngleAxis(90, Vector3.forward));
 
-        projectile.ProjectileOutOfBounds += EnableProjectile;
-
         projectile.gameObject.GetComponent<SpriteRenderer>().color = Color.green;
         projectile.gameObject.layer = LayerMask.NameToLayer("PlayerProjectile");
         projectile.isPlayers = true;
         projectile.projectileSpeed = 4;
         projectile.projectileDirection = Vector2.up;
+
+        DisableProjectile();
     }
 
     #endregion
@@ -120,6 +127,13 @@ public class PlayerController : MonoBehaviour
     {
         GameObject xp = Instantiate(expolsion, transform.position, Quaternion.identity);
         xp.transform.localScale = new Vector2(2, 2);
+
+        if (HitByEnemy != null)
+        {
+            HitByEnemy();
+        }
+
+        gameSceneController.ScoreUpdatedOnKill -= GameSceneController_ScoreUpdatedOnKill;
 
         Destroy(gameObject);
     }

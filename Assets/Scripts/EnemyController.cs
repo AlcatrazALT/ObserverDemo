@@ -3,7 +3,7 @@ using UnityEngine;
 
 public delegate void EnemyDestroyedHandler(int pointValue);
 
-public class EnemyController : MonoBehaviour
+public class EnemyController : MonoBehaviour, IEndGameObserver
 {
     #region Field Declarations
 
@@ -75,10 +75,19 @@ public class EnemyController : MonoBehaviour
 
         EnemyDestroyed?.Invoke(pointValue);
 
-        Destroy(gameObject);
+        RemoveAndDestroy();
     }
 
     #endregion
+
+    private void RemoveAndDestroy()
+    {
+        var gameSceneController = FindObjectOfType<GameSceneController>();
+
+        gameSceneController.RemoveObserver(this);
+
+        Destroy(gameObject);
+    }
 
     #region Projectile control
 
@@ -120,6 +129,13 @@ public class EnemyController : MonoBehaviour
         shotDelay = new WaitForSeconds(shotdelayTime / 3);
         shotSpeed = shotSpeedxN;
     }
+
+    public void Notify()
+    {
+        Destroy(gameObject);
+    }
+
+
 
     #endregion
 }

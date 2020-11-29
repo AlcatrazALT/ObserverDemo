@@ -14,8 +14,6 @@ public class ProjectileController : MonoBehaviour
 
     #region Movement
 
-    public event OutOfBoundsHandler ProjectileOutOfBounds;
-
     // Update is called once per frame
     void Update()
     {
@@ -30,8 +28,9 @@ public class ProjectileController : MonoBehaviour
         {
             if (isPlayers == true)
             {
-                ProjectileOutOfBounds?.Invoke();
+                EventBroker.CallProjectileOutOfBounds();
             }
+
             Destroy(gameObject);
         }
     }
