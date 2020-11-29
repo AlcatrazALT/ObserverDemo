@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
@@ -15,6 +16,8 @@ public class PlayerController : MonoBehaviour
 
     private bool projectileEnabled = true;
     private WaitForSeconds shieldTimeOut;
+
+    private GameSceneController gameSceneController;
     
     #endregion
 
@@ -22,8 +25,17 @@ public class PlayerController : MonoBehaviour
 
     private void Start()
     {
+
+        gameSceneController = FindObjectOfType<GameSceneController>();
+        gameSceneController.ScoreUpdatedOnKill += GameSceneController_ScoreUpdatedOnKill;
+
         shieldTimeOut = new WaitForSeconds(shieldDuration);
         EnableShield();
+    }
+
+    private void GameSceneController_ScoreUpdatedOnKill(int pointValue)
+    {
+        EnableProjectile();
     }
 
     #endregion
@@ -83,7 +95,9 @@ public class PlayerController : MonoBehaviour
         ProjectileController projectile =
             Instantiate(projectilePrefab, spawnPosition, Quaternion.AngleAxis(90, Vector3.forward));
 
-       projectile.gameObject.GetComponent<SpriteRenderer>().color = Color.green;
+        projectile.ProjectileOutOfBounds += EnableProjectile;
+
+        projectile.gameObject.GetComponent<SpriteRenderer>().color = Color.green;
         projectile.gameObject.layer = LayerMask.NameToLayer("PlayerProjectile");
         projectile.isPlayers = true;
         projectile.projectileSpeed = 4;
@@ -91,6 +105,8 @@ public class PlayerController : MonoBehaviour
     }
 
     #endregion
+
+    public event Action HitByEnemy;
 
     #region Damage
 
